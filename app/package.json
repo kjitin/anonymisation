@@ -1,0 +1,32 @@
+{
+  "name": "anonymisation",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --platform=node --outfile=dist/index.js",
+    "check": "biome check",
+    "format": "biome format --write",
+    "start": "npm run build",
+    "test": "vitest",
+    "typecheck": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@biomejs/biome": "2.4.12",
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@aws-sdk/rds-signer": "^3.1043.0",
+    "@effect/experimental": "^0.60.0",
+    "@effect/platform": "^0.96.1",
+    "@effect/platform-node": "^0.106.0",
+    "@effect/sql": "^0.51.1",
+    "@effect/sql-pg": "^0.52.1",
+    "effect": "^3.21.2"
+  }
+}

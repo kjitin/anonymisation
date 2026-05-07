@@ -1,0 +1,13 @@
+{
+    "passportNumber": "FPE_PN",
+    "forenames": "FPE",
+    "surname": "FPE",
+    "dateOfBirth": "DATE",
+    "mrz": "MRZ",
+    "dataItems": {
+        "dataItem": "CONSTANT_DATA_ITEM"
+    },
+    "images": {
+        "imageKey": "IMAGE"
+    }
+}
