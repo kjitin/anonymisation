@@ -17,7 +17,9 @@ class Encryption extends Effect.Service<Encryption>()(
                     return `${value}_fpe`;
                 }),
                 EMAIL:(a: string): Effect.Effect<string, Error, never> =>
-                Effect.succeed(`${a}_email`)            
+                Effect.succeed(`${a}_email`),
+                TEXT:(a: string): Effect.Effect<string, Error, never> =>
+                    Effect.succeed(`${a}_text`)             
                 
             }
         })
