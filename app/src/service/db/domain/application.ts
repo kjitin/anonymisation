@@ -1,6 +1,8 @@
 import { Effect, Schema } from "effect";
 import { ClientDst, ClientSrc } from "../client.js";
 import { ApplicationModel} from '../../../data/domain/application.js'
+import { SqlSchema } from "@effect/sql";
+import { Layer } from "effect";
 
 class ApplicationSrc extends Effect.Service<ApplicationSrc>()(
     'Service/Db/Domain/ApplicationSrc',
@@ -39,3 +41,11 @@ class ApplicationDst extends Effect.Service<ApplicationDst>()(
         }),
     },
 ){}
+
+
+const ApplicationLayer = Layer.mergeAll(
+    ApplicationSrc.Default,
+    ApplicationDst.Default,
+).pipe(Layer.provide(ClientSrc.Default), Layer.provide(ClientDst.Default));
+
+export { ApplicationDst, ApplicationSrc, ApplicationLayer, ApplicationModel};

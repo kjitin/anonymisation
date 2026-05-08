@@ -4,6 +4,9 @@ import { decodeUnknown, parseJson, type Schema } from "effect/Schema";
 import type { ApplicationModel } from "../data/domain/application.js";
 import type { PassportModel } from "../data/domain/passport.js";
 import {ApplicationRule } from "../data/rule/application.js"
+import {PassportRule } from "../data/rule/passport.js"
+import { Encryption } from "./encryption.js";
+import { Env } from "./env.js";
 
 class Rule extends Effect.Service<Rule>() (
     'Service/Rule', {
@@ -20,7 +23,7 @@ class Rule extends Effect.Service<Rule>() (
               readFileString(path.join(base,domain), 'utf-8')
               .pipe(
                   Effect.flatMap(
-                      decodeUnknown(pareseJson(schema), {onExcessProperty: 'error'})
+                      decodeUnknown(parseJson(schema), {onExcessProperty: 'error'})
                   ),
               );
               
