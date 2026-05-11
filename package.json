@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@noble/ciphers": "^2.2.0"
+  }
+}

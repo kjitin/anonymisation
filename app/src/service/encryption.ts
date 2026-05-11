@@ -1,20 +1,23 @@
 import { Effect } from "effect";
-import { Env } from '../service/env.js'
+import { Secrets } from "./secrets.js";
+import { fpeString,hexByteString } from "../data/encryption/fpe/string.js";
+
 class Encryption extends Effect.Service<Encryption>()(
     'Service/Encryption', {
         effect: Effect.gen(function* () {
-            const {
-                fpe: {key, tweak},
-            } = yield* Env;
-            
             
             return {
-                FPE:(value: string): Effect.Effect<string, Error, never> =>
+                FPE:(value: string): Effect.Effect<string, Error, Secrets> =>
                 Effect.gen(function* () {
-                    yield* Effect.log(
-                        `Encrypting ${value} with key ${key} tweak ${tweak}`,
-                    );
-                    return `${value}_fpe`;
+                    const { key, tweak } = yield* Secrets;
+                    return yield* Effect.try({
+                        try: () => fpeString(
+                            hexByteString(key),
+                            new TextEncoder().encode(tweak),
+                            value
+                        ),
+                        catch: error => new Error(`FPE encryption failed: ${error}`),
+                    })
                 }),
                 EMAIL:(a: string): Effect.Effect<string, Error, never> =>
                 Effect.succeed(`${a}_email`),
