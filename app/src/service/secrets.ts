@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import { func } from "effect/FastCheck";
 import { Env } from "./env.js";
 
 class Secrets extends Effect.Service<Secrets>()('Service/Secrets', {
