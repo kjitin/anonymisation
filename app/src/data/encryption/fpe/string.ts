@@ -1,7 +1,24 @@
 import { FF1 } from '@noble/ciphers/ff1.js'
+import { Secrets } from '../../../service/secrets.js';
+import { Effect, Redacted } from 'effect';
 
 const STRING_ALPHABET=  "ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
 const PASSTHROUGH =  new Set([' ', '-']);
+
+const encryptFpe = (value:string): Effect.Effect<string, Error, Secrets> => 
+    Effect.gen(function* () {
+       const {key, tweak } = yield* Secrets;
+
+       return yield* Effect.try({
+        try: () =>
+            fpeString(
+                hexByteString(Redacted.value(key)),
+            new TextEncoder().encode(Redacted.value(tweak)),
+            value,            
+            ),
+            catch: error => new Error(),
+       })
+    })
 
 const hexByteString =(hex: string) =>
     Uint8Array.from(Buffer.from(hex, 'hex'));
@@ -32,4 +49,4 @@ const fpeString = (key:Uint8Array, tweak: Uint8Array, value:string) => {
    ).join('');
 }
 
-export { fpeString, hexByteString };
+export { encryptFpe };
