@@ -4,14 +4,14 @@ import { encryptFpe } from '../fpe/string.js'
 import { Secrets } from '../../../service/secrets.js';
 
 // Test layer with known fixed values — 32 hex chars = 16 bytes (AES-128)
-const TestSecrets = Secrets.layer({
+const testSecrets = {
     key:   Redacted.make('0123456789abcdef0123456789abcdef'),
     tweak: Redacted.make('test-tweak'),
-});
+};
 
 // Helper: run an Effect that needs Secrets, return a Promise for vitest
-const run = (effect: Effect.Effect<string, Error, Secrets>): string =>
-    Effect.runSync(effect.pipe(Effect.provideService(TestSecrets)));
+const run = (effect: Effect.Effect<string, Error, Secrets>): Promise<string> =>
+    Effect.runPromise(Effect.provideService(effect, Secrets, testSecrets));
 
 describe('encryptFpe', () => {
 
