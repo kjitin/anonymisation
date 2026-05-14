@@ -21,8 +21,8 @@ const Env = Config.all({
 
     fpe: Config.nested(
         Config.all({
-            key: Config.string('KEY'),
-            tweak: Config.string('TWEAK'),
+            key: Config.redacted('KEY'),
+            tweak: Config.redacted('TWEAK'),
         }),
         'FPE'
     ),
