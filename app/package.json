@@ -27,6 +27,7 @@
     "@effect/platform-node": "^0.106.0",
     "@effect/sql": "^0.51.1",
     "@effect/sql-pg": "^0.52.1",
+    "@fp-ts/optic":"0.25.0",
     "effect": "^3.21.2"
   }
 }

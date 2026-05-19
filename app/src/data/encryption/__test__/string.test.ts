@@ -2,16 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { Effect, Redacted } from 'effect';
 import { encryptFpe } from '../fpe/string.js'
 import { Secrets } from '../../../service/secrets.js';
+import { effect } from 'effect/Layer';
+import { cons } from 'effect/List';
 
-// Test layer with known fixed values — 32 hex chars = 16 bytes (AES-128)
-const testSecrets = {
-    key:   Redacted.make('0123456789abcdef0123456789abcdef'),
-    tweak: Redacted.make('test-tweak'),
-};
 
 // Helper: run an Effect that needs Secrets, return a Promise for vitest
-const run = (effect: Effect.Effect<string, Error, Secrets>): Promise<string> =>
-    Effect.runPromise(Effect.provideService(effect, Secrets, testSecrets));
+const run = (effect: Effect.Effect<string, Error, Secrets>): string =>
+    Effect.runSync(
+        Effect.provideService(effect, Secrets, {
+            key: Redacted.make('0123456789ABCDEF0123456789ABCDEF'),
+            tweak: Redacted.make('test-tweak')
+        } as unknown as Secrets
+    )
+    );
 
 describe('encryptFpe', () => {
 
@@ -79,26 +82,20 @@ describe('encryptFpe', () => {
         });
 
         it('different keys produce different output', async () => {
-            const OtherSecrets = Secrets.layer({
-                key:   Redacted.make('fedcba9876543210fedcba9876543210'),
-                tweak: Redacted.make('test-tweak'),
-            });
-            const a = await run(encryptFpe('JOHN'));
-            const b = await Effect.runPromise(
-                encryptFpe('JOHN').pipe(Effect.provide(OtherSecrets))
-            );
-            expect(a).not.toBe(b);
-        });
+            const otherSecret = (
+                effect:Effect.Effect<string, Error, Secrets>,
+            ): string => 
+                Effect.runSync(
+                    Effect.provideService(effect, Secrets, {
+                        key: Redacted.make('0123456789ABCDEF0123456789ABBBCD'),
+                        tweak: Redacted.make('test-tweak'),
 
-        it('different tweaks produce different output', async () => {
-            const OtherSecrets = Secrets.layer({
-                key:   Redacted.make('0123456789abcdef0123456789abcdef'),
-                tweak: Redacted.make('different-tweak'),
-            });
+                    } as unknown as Secrets
+                )
+                )
             const a = await run(encryptFpe('JOHN'));
-            const b = await Effect.runPromise(
-                encryptFpe('JOHN').pipe(Effect.provide(OtherSecrets))
-            );
+            const b = otherSecret(encryptFpe('JOHN'))
+            
             expect(a).not.toBe(b);
         });
 
