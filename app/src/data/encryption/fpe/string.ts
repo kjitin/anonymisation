@@ -1,9 +1,9 @@
 import { FF1 } from '@noble/ciphers/ff1.js'
 import { Secrets } from '../../../service/secrets.js';
 import { Effect, Redacted } from 'effect';
+import { AZ, hexToBytestring } from '@util/encryption.js'
 
-const STRING_ALPHABET=  "ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-const PASSTHROUGH =  new Set([' ', '-']);
+const expectedChars = AZ.concat(' ', '-', "'");
 
 const encryptFpe = (value:string): Effect.Effect<string, Error, Secrets> => 
     Effect.gen(function* () {
@@ -16,12 +16,10 @@ const encryptFpe = (value:string): Effect.Effect<string, Error, Secrets> =>
             new TextEncoder().encode(Redacted.value(tweak)),
             value,            
             ),
-            catch: error => new Error(),
+            catch: error => new Error(`FPE encryption failed: ${error}`),
        })
     })
 
-const hexByteString =(hex: string) =>
-    Uint8Array.from(Buffer.from(hex, 'hex'));
 
 const fpeString = (key:Uint8Array, tweak: Uint8Array, value:string) => {
     const chars:string[]  = value? Array.from(value.toUpperCase().trim()): [];
@@ -29,19 +27,18 @@ const fpeString = (key:Uint8Array, tweak: Uint8Array, value:string) => {
     const toEncrypt:string[] = []
 
     chars.forEach((c, i) => {
-        if(PASSTHROUGH.has(c)) {
+        const idx = expectedChars.indexOf(c);
+        if(idx === -1) {
             passthroughPosition.set(i, c);
         } else {
-            const idx = STRING_ALPHABET.indexOf(c);
-            if (idx === -1) throw new Error(`Invalid character: ${c}`);
             toEncrypt.push(c);
         }
     })
 
-    const indices = toEncrypt.map(c => STRING_ALPHABET.indexOf(c));
-    const encryptedChars = FF1(STRING_ALPHABET.length, key, tweak)
+    const indices = toEncrypt.map(c => expectedChars.indexOf(c));
+    const encryptedChars = FF1(expectedChars.length, key, tweak)
     .encrypt(indices)
-    .map(i => STRING_ALPHABET[i]);
+    .map(i => expectedChars[i]);
 
     let encryptedIndex = 0;
     return chars.map((_, i) => 
