@@ -6,7 +6,7 @@ const modifyEffect =
 <E,R>(f: (a:A) => Effect.Effect<B,E,R>) =>
 (s: S): Effect.Effect<T,E,R> =>
 pipe(
- 0.getOptic(s),
+ o.getOptic(s),
 Either.match({
    onLeft: ([_,t]) => Effect.succeed(t),
 onRight:a => 

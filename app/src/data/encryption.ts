@@ -1,8 +1,9 @@
 
 import { Effect, Option, type Types } from "effect";
 import { decodeUnknown, Forbidden, fail, map } from "effect/ParseResult";
-import { isUndefined } from "effect/Predicate";
+import { Random } from "../service/random.js";
 import { toEntries } from "effect/Record";
+import {id } from '@fp-ts/optic';
 import {
     declare,
     format,
@@ -12,11 +13,13 @@ import {
     Struct,
     Union
 } from 'effect/Schema';
+import { modifyEffect } from "../util/optic.js";
 
 import { Encryption } from "../service/encryption.js";
+import { Secrets } from "../service/secrets.js";
 
 type EncryptionFn = <A, E, R>(a: A) => Effect.Effect<A, E, R>;
-const EncryptionAll = Literal('NONE', 'NULL');
+const EncryptionAll = Literal('NONE');
 const EncryptionDate = Literal('DATE');
 const EncryptionNumber = Literal('FPE_PN');
 const EncryptionString  = Literal(
@@ -25,14 +28,14 @@ const EncryptionString  = Literal(
 const EncryptionLiteral= Union(EncryptionDate,EncryptionNumber,EncryptionString,);
 
 const allMethod = <A>(): Schema<
-(a: A) => Effect.Effect<A|null, Error, Encryption>,
+(a: A) => Effect.Effect<A, Error, Encryption|Random|Secrets>,
         typeof EncryptionAll.Type
 > =>
  declare<
- (a:A) => Effect.Effect<A|null, Error, Encryption>,
+ (a:A) => Effect.Effect<A, Error, Encryption|Random|Secrets>,
     typeof EncryptionAll.Type,
     [typeof EncryptionAll]
->(
+> (
     [EncryptionAll],
         {
     decode: item => (input , parseOptions, _ast) =>
@@ -137,9 +140,9 @@ const EncryptionMethod = {
 
 const EncryptionOptional =  <S, A, E, R>(
     schema: Schema<(a: A) => Effect.Effect<A, E, R>, S>,
-): Schema<(a: A| undefined) => Effect.Effect< A| undefined, E, R>, S> =>
+): Schema<(a: Option.Option<A>) => Effect.Effect< Option.Option<A>, E, R>, S> =>
     declare<
-    (a: A| undefined) => Effect.Effect< A| undefined, E, R>, 
+    (a: Option.Option<A>) => Effect.Effect<Option.Option<A>, E, R>, 
     S, 
     [typeof schema]
     >(
@@ -147,7 +150,7 @@ const EncryptionOptional =  <S, A, E, R>(
         {
             decode: item => (input,parseOptions,_ast) =>
                 decodeUnknown(item)(input,parseOptions).pipe(
-                    map(fn => a => (isUndefined(a)? Effect.succeed(a): fn(a))),
+                    map(modifyEffect(id<Option.Option<A>>().some())),
                 ),
             encode: _item => (fn, _parseOptions, ast) =>
                 fail(
@@ -169,7 +172,7 @@ const EncryptionList =  <S, A, E, R>(
         {
             decode: item => (input,parseOptions,_ast) =>
                 decodeUnknown(item)(input,parseOptions).pipe(
-                    map(fn => a => Effect.all(a.map()x => fn(x))),
+                    map(fn => a => Effect.all(a.map(x => fn(x)))),
                 ),
             encode: _item => (fn, _parseOptions, ast) =>
                 fail(
