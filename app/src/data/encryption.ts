@@ -20,7 +20,7 @@ const EncryptionAll = Literal('NONE', 'NULL');
 const EncryptionDate = Literal('DATE');
 const EncryptionNumber = Literal('FPE_PN');
 const EncryptionString  = Literal(
-'FPE','EMAIL','TEXT','MRZ','CONSTANT_DATA_ITEM','IMAGE',
+'FPE','EMAIL','TEXT','CONSTANT_DATA_ITEM','IMAGE',
 );
 const EncryptionLiteral= Union(EncryptionDate,EncryptionNumber,EncryptionString,);
 
